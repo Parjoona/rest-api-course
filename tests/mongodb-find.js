@@ -11,7 +11,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
 
   // find = query
   // find({name: 'blabla'})
-  findPerson(db, 'NextOne')
+  findTodo(db, '')
 
   db.close();
 });
@@ -39,7 +39,7 @@ function findById(db, id) {
   });
 }
 
-function findPerson(db, name) {
+function findTodo(db, name) {
   db.collection('Todos').find({
     name
   }).toArray().then((result) => {
