@@ -1,0 +1,20 @@
+Start MongoDB server
+
+C:\Program Files\MongoDB\Server\3.6\bin
+run: mongod.exe --dbpath \DBPATH\ (Users\Pauma\mongo-data)
+
+Command prompt server
+C:\Program Files\MongoDB\Server\3.6\bin
+run: mongo.exe
+
+Insert text objekt i vår db, todos listan.
+db.todos.insert({text: 'Create new Node course'})
+
+Query för att finna specifika objekt, tomt ger tillbaka alla.
+db.todos.find()
+
+ObjectID
+First 4 bytes: Timestamp
+Next 3 bytes: Machine identifier
+Next 2 bytes: Processing ID
+Next 3 bytes: Counter, starting with a random number
