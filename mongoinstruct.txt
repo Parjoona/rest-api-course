@@ -1,6 +1,7 @@
 Start MongoDB server
 
 C:\Program Files\MongoDB\Server\3.6\bin
+mongod.exe --dbpath \Users\Pauma\mongo-data
 run: mongod.exe --dbpath \DBPATH\ (Users\Pauma\mongo-data)
 
 Command prompt server
