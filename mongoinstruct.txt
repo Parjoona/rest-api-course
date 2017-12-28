@@ -1,5 +1,4 @@
 Start MongoDB server
-
 C:\Program Files\MongoDB\Server\3.6\bin
 mongod.exe --dbpath \Users\Pauma\mongo-data
 run: mongod.exe --dbpath \DBPATH\ (Users\Pauma\mongo-data)
@@ -19,3 +18,6 @@ First 4 bytes: Timestamp
 Next 3 bytes: Machine identifier
 Next 2 bytes: Processing ID
 Next 3 bytes: Counter, starting with a random number
+
+HEROKU
+git push heroku master

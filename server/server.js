@@ -1,3 +1,4 @@
+// Hämtar enviroment beroende på test/develpment eller live
 require('./config/config');
 
 const _ = require('lodash');
@@ -7,10 +8,12 @@ const {
   ObjectID
 } = require('mongodb');
 
-// Local
+// Local connection
 const {
   mongoose
 } = require('./db/connect');
+
+// Models så ingenting går fel
 const {
   Todo
 } = require('./models/todo');
@@ -22,22 +25,33 @@ let port = process.env.PORT;
 
 let app = express();
 
+// Middleware, parsar json som pushas igenom
 app.use(bodyParser.json());
+
+/*
+
+  TODOS
+
+*/
 // Push to site
 app.post('/todos', (req, res) => {
   let todo = new Todo({
     text: req.body.text
   });
 
+  // Använder .save från mongoose
   todo.save().then((doc) => {
+    // Sickar iväg todo som HTTP request
     res.send(doc);
   }, (e) => {
     res.status(400).send(e)
   });
 });
 
+// Hämtar alla todos
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
+    // skickar tillbaka todos som objekt
     res.send({
       todos
     });
@@ -46,11 +60,14 @@ app.get('/todos', (req, res) => {
   });
 });
 
+// Hämtar spesifika todos beroende på id
 app.get('/todos/:id', (req, res) => {
   let id = req.params.id;
 
+  // Lämnar funktionen om det inte existerar någon med den id
   if (!ObjectID.isValid(id)) return res.status(404).send();
 
+  // Mongoose findbyid och skicka tillbaka den todoen
   Todo.findById(id).then((todo) => {
     if (!todo) return res.status(404).send();
     res.send({
@@ -61,6 +78,8 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
+
+// deletear todo med id
 app.delete('/todos/:id', (req, res) => {
   let id = req.params.id;
   if (!ObjectID.isValid(id)) return res.status(404).send();
@@ -75,6 +94,7 @@ app.delete('/todos/:id', (req, res) => {
   })
 });
 
+// Updaterar todo
 app.patch('/todos/:id', (req, res) => {
   let id = req.params.id;
   // picks out what i want to update, specific from the req.body.
@@ -99,8 +119,32 @@ app.patch('/todos/:id', (req, res) => {
   }).catch((e) => {
     res.status(400).send()
   });
-
 });
+
+
+/*
+
+  USERS
+
+*/
+
+app.post('/users', (req, res) => {
+  let body = _.pick(req.body, ['email', 'password']);
+  let user = new User(body);
+
+  // User = model method / all
+  // user = instance method / singular
+
+  // Använder .save från mongoose
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    // Sickar iväg user som HTTP request
+    // header tar 2 grejer
+    // Header name (kan vara en custom), value
+    res.header('x-auth', token).send(user);
+  }).catch(e => res.status(400).send(e));
+})
 
 app.listen(port);
 
