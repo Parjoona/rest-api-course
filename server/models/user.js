@@ -36,7 +36,7 @@ let UserSchema = new mongoose.Schema({
   }]
 });
 
-// CUT OF WHAT WE ACTUALLY NEEDS, NOT TOKENS
+// CUT OF WHAT WE ACTUALLY NEEDS, NOT INCLUDING TOKENS
 UserSchema.methods.toJSON = function() {
   let userObject = this.toObject();
   return _.pick(userObject, ['_id', 'email']);
@@ -58,6 +58,21 @@ UserSchema.methods.generateAuthToken = function() {
     return token;
   });
 };
+
+UserSchema.statics.findByToken = function(token) {
+  let decoded;
+  try {
+     decoded = jwt.verify(token, 'secretword')
+  } catch (e) {
+    return Promise.reject();
+  }
+
+  return User.findOne({
+    '_id': decoded._id,
+    'tokens.token': token,
+    'tokens.access': 'auth'
+  });
+}
 
 let User = mongoose.model('User', UserSchema);
 
