@@ -131,6 +131,18 @@ app.patch('/todos/:id', (req, res) => {
 
 */
 
+app.post('/users/login', (req, res) => {
+  let body = _.pick(req.body, ['email', 'password']);
+  res.send(body);
+
+  // pass a user, get usercredentials back
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+  }).catch (e => res.status(400).send());
+});
+
 app.post('/users', (req, res) => {
   let body = _.pick(req.body, ['email', 'password']);
   let user = new User(body);
@@ -148,7 +160,6 @@ app.post('/users', (req, res) => {
     res.header('x-auth', token).send(user);
   }).catch(e => res.status(400).send(e));
 })
-
 
 
 app.get('/users/me', authenticate, (req, res) => {

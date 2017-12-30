@@ -75,6 +75,19 @@ UserSchema.statics.findByToken = function(token) {
   });
 };
 
+UserSchema.statics.findByCredentials = function(email, password) {
+  // this = USERS
+  return this.findOne({email}).then((user) => {
+    if (!user) return Promise.reject();
+
+    return new Promise((resolve, reject) => {
+      bcrypt.compare(password, user.password, (err, res) => {
+        (true) ? resolve(user) : reject();
+      });
+    });
+  });
+};
+
 // Mongoose middleware!
 // Checks if password has been changed
 UserSchema.pre('save', function(next) {
