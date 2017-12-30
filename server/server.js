@@ -131,13 +131,13 @@ app.patch('/todos/:id', (req, res) => {
 
 */
 
-app.delete('users/me/token', authenticate, (req, res) => {
+app.delete('/users/me/token', authenticate, (req, res) => {
   req.user.removeToken(req.token).then(() => {
     res.status(200).send();
   }, () => {
     res.status(400).send();
-  })
-})
+  });
+});
 
 app.post('/users', (req, res) => {
   let body = _.pick(req.body, ['email', 'password']);
