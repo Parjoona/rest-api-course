@@ -131,17 +131,13 @@ app.patch('/todos/:id', (req, res) => {
 
 */
 
-app.post('/users/login', (req, res) => {
-  let body = _.pick(req.body, ['email', 'password']);
-  res.send(body);
-
-  // pass a user, get usercredentials back
-  User.findByCredentials(body.email, body.password).then((user) => {
-    return user.generateAuthToken().then((token) => {
-      res.header('x-auth', token).send(user);
-    });
-  }).catch (e => res.status(400).send());
-});
+app.delete('users/me/token', authenticate, (req, res) => {
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.status(400).send();
+  })
+})
 
 app.post('/users', (req, res) => {
   let body = _.pick(req.body, ['email', 'password']);
@@ -165,6 +161,16 @@ app.post('/users', (req, res) => {
 app.get('/users/me', authenticate, (req, res) => {
   // Gets token from "me"
   res.send(req.user);
+});
+
+app.post('/users/login', (req, res) => {
+  let body = _.pick(req.body, ['email', 'password']);
+  // pass a user, get usercredentials back
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+  }).catch (e => res.status(400).send());
 });
 
 app.listen(port);
