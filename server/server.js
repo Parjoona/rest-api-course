@@ -37,9 +37,10 @@ app.use(bodyParser.json());
 
 */
 // Push to site
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
   let todo = new Todo({
-    text: req.body.text
+    text: req.body.text,
+    _creator: req.user._id
   });
 
   // Använder .save från mongoose
@@ -52,8 +53,10 @@ app.post('/todos', (req, res) => {
 });
 
 // Hämtar alla todos
-app.get('/todos', (req, res) => {
-  Todo.find().then((todos) => {
+app.get('/todos', authenticate, (req, res) => {
+  Todo.find({
+    _creator: req.user._id
+  }).then((todos) => {
     // skickar tillbaka todos som objekt
     res.send({
       todos
@@ -64,14 +67,17 @@ app.get('/todos', (req, res) => {
 });
 
 // Hämtar spesifika todos beroende på id
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
   let id = req.params.id;
 
   // Lämnar funktionen om det inte existerar någon med den id
   if (!ObjectID.isValid(id)) return res.status(404).send();
 
   // Mongoose findbyid och skicka tillbaka den todoen
-  Todo.findById(id).then((todo) => {
+  Todo.findOne({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo) => {
     if (!todo) return res.status(404).send();
     res.send({
       todo
@@ -83,11 +89,14 @@ app.get('/todos/:id', (req, res) => {
 
 
 // deletear todo med id
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
   let id = req.params.id;
   if (!ObjectID.isValid(id)) return res.status(404).send();
 
-  Todo.findByIdAndRemove(id).then((todo) => {
+  Todo.findOneAndRemove({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo) => {
     if (!todo) return res.status(404).send();
     res.send({
       todo
@@ -98,7 +107,7 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 // Updaterar todo
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
   let id = req.params.id;
   // picks out what i want to update, specific from the req.body.
   let body = _.pick(req.body, ['text', 'completed']);
@@ -110,7 +119,10 @@ app.patch('/todos/:id', (req, res) => {
     body.completedAt = null;
   }
 
-  Todo.findByIdAndUpdate(id, {
+  Todo.findOneAndUpdate({
+    _id: id,
+    _creator: req.user._id
+  }, {
     $set: body
   }, {
     new: true
@@ -170,7 +182,7 @@ app.post('/users/login', (req, res) => {
     return user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);
     });
-  }).catch (e => res.status(400).send());
+  }).catch(e => res.status(400).send());
 });
 
 app.listen(port);
