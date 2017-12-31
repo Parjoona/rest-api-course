@@ -65,7 +65,9 @@ UserSchema.methods.removeToken = function(token) {
   // Mongoose update
   return this.update({
     $pull: {
-      tokens: {token}
+      tokens: {
+        token
+      }
     }
   })
 };
