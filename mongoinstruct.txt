@@ -21,3 +21,7 @@ Next 3 bytes: Counter, starting with a random number
 
 HEROKU
 git push heroku master
+
+Setting and getting enviroment variables:
+heroku config - gets MONGODB_URI
+heroku config:set/heroku config:get/heroku config:unset

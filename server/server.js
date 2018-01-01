@@ -154,7 +154,7 @@ app.post('/users', (req, res) => {
     // header tar 2 grejer
     // Header name (kan vara en custom), value
     res.header('x-auth', token).send(user);
-  }).catch(e => res.status(400).send(e));
+  }).catch(e => res.status(400).send());
 })
 
 app.get('/users/me', authenticate, (req, res) => {
