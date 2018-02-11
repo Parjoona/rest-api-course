@@ -4,15 +4,25 @@ require('./config/config');
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
-const { ObjectID } = require('mongodb');
+const {
+  ObjectID
+} = require('mongodb');
 
 // Local connection
-const { mongoose } = require('./db/connect');
+const {
+  mongoose
+} = require('./db/connect');
 
 // Models så ingenting går fel
-const { Todo } = require('./models/todo');
-const { User } = require('./models/user');
-const { authenticate } = require('./middleware/authenticate');
+const {
+  Todo
+} = require('./models/todo');
+const {
+  User
+} = require('./models/user');
+const {
+  authenticate
+} = require('./middleware/authenticate');
 
 let port = process.env.PORT;
 
@@ -78,21 +88,22 @@ app.get('/todos/:id', authenticate, (req, res) => {
 });
 
 // deletear todo med id
-app.delete('/todos/:id', authenticate, (req, res) => {
+app.delete('/todos/:id', authenticate, async (req, res) => {
   let id = req.params.id;
   if (!ObjectID.isValid(id)) return res.status(404).send();
 
-  Todo.findOneAndRemove({
-    _id: id,
-    _creator: req.user._id
-  }).then((todo) => {
+  try {
+    const todo = await Todo.findOneAndRemove({
+      _id: id,
+      _creator: req.user._id
+    })
     if (!todo) return res.status(404).send();
     res.send({
       todo
     });
-  }).catch((e) => {
-    res.status(400).send();
-  })
+  } catch (e) {
+    res.status(400).send()
+  }
 });
 
 // Updaterar todo
@@ -131,30 +142,29 @@ app.patch('/todos/:id', authenticate, (req, res) => {
 
 */
 
-app.delete('/users/me/token', authenticate, (req, res) => {
-  req.user.removeToken(req.token).then(() => {
+app.delete('/users/me/token', authenticate, async (req, res) => {
+  try {
+    await req.user.removeToken(req.token)
     res.status(200).send();
-  }, () => {
+  } catch (e) {
     res.status(400).send();
-  });
+  }
 });
 
-app.post('/users', (req, res) => {
+app.post('/users', async (req, res) => {
   let body = _.pick(req.body, ['email', 'password']);
   let user = new User(body);
 
   // User = model method / all
   // user = instance method / singular
 
-  // Använder .save från mongoose
-  user.save().then(() => {
-    return user.generateAuthToken();
-  }).then((token) => {
-    // Sickar iväg user som HTTP request
-    // header tar 2 grejer
-    // Header name (kan vara en custom), value
-    res.header('x-auth', token).send(user);
-  }).catch(e => res.status(400).send());
+  try {
+    await user.save
+    const token = await user.generateAuthToken()
+    res.header('x-auth', token).send(user)
+  } catch (e) {
+    res.status(400).send()
+  }
 })
 
 app.get('/users/me', authenticate, (req, res) => {
@@ -162,14 +172,16 @@ app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
 });
 
-app.post('/users/login', (req, res) => {
-  let body = _.pick(req.body, ['email', 'password']);
-  // pass a user, get usercredentials back
-  User.findByCredentials(body.email, body.password).then((user) => {
-    return user.generateAuthToken().then((token) => {
-      res.header('x-auth', token).send(user);
-    });
-  }).catch(e => res.status(400).send());
+app.post('/users/login', async (req, res) => {
+  const body = _.pick(req.body, ['email', 'password']);
+
+  try {
+    const user = await User.findByCredentials(body.email, body.password)
+    const token = await user.generateAuthToken()
+    res.header('x-auth', token).send(user)
+  } catch (e) {
+    res.status(400).send()
+  }
 });
 
 app.listen(port);

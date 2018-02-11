@@ -25,3 +25,9 @@ git push heroku master
 Setting and getting enviroment variables:
 heroku config - gets MONGODB_URI
 heroku config:set/heroku config:get/heroku config:unset
+
+
+START MONGODB
+Gå till C:\Program Files\MongoDB\Server\3.6\bin
+Skriv:
+--dbpath C:\Users\Pauma\mongo-data
